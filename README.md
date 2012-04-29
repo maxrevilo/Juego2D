@@ -1,0 +1,4 @@
+Juego2D
+=======
+
+Juego 2D para la materia TÓPICOS ESPECIALES EN COMPUTACIÓN GRÁFICA PARA VÍDEO JUEGOS.
