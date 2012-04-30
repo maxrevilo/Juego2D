@@ -1,6 +1,21 @@
-# Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
-bin
-obj
+# Common files to ignore
+*.swp
+
+# Compressed Files
+*.zip
+
+# VS2010 Files
+*.suo
+
+# XNA Files
+**/bin/*
+**/obj/*
+*.chachefile
+*.Debug.cachefile
+*.ccgame
+
+# Don't ignore the drivers
+!*.dll
 
 # mstest test results
 TestResults

@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Juego2D", "Juego2D\Juego2D\Juego2D.csproj", "{A0742DE8-F570-4D17-95C2-975DB00431B2}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "Juego2DContent", "Juego2D\Juego2DContent\Juego2DContent.contentproj", "{721B714C-7958-4595-AB49-E3B9EF7C4282}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0742DE8-F570-4D17-95C2-975DB00431B2}.Debug|x86.ActiveCfg = Debug|x86
+		{A0742DE8-F570-4D17-95C2-975DB00431B2}.Debug|x86.Build.0 = Debug|x86
+		{A0742DE8-F570-4D17-95C2-975DB00431B2}.Release|x86.ActiveCfg = Release|x86
+		{A0742DE8-F570-4D17-95C2-975DB00431B2}.Release|x86.Build.0 = Release|x86
+		{721B714C-7958-4595-AB49-E3B9EF7C4282}.Debug|x86.ActiveCfg = Debug|x86
+		{721B714C-7958-4595-AB49-E3B9EF7C4282}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
