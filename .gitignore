@@ -6,10 +6,11 @@
 
 # VS2010 Files
 *.suo
+*.csproj.user
 
 # XNA Files
-**/bin/*
-**/obj/*
+*/bin/*
+*/obj/*
 *.chachefile
 *.Debug.cachefile
 *.ccgame

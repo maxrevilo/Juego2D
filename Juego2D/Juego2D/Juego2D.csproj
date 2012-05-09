@@ -90,6 +90,9 @@
     <Reference Include="mscorlib">
       <Private>False</Private>
     </Reference>
+    <Reference Include="ProjectMercury">
+      <HintPath>..\..\Mercury 3.1\References\X86\ProjectMercury.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
@@ -110,12 +113,28 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
+    <Compile Include="Screens\BackgroundScreen.cs" />
+    <Compile Include="Screens\MainMenuScreen.cs" />
+    <Compile Include="Screens\MenuManagement\MenuEntry.cs" />
+    <Compile Include="Screens\MenuManagement\MenuScreen.cs" />
+    <Compile Include="Screens\MenuManagement\PlayerIndexEventArgs.cs" />
+    <Compile Include="Screens\MessageBoxScreen.cs" />
+    <Compile Include="Screens\OptionsMenuScreen.cs" />
+    <Compile Include="Screens\ScreenFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Farseer Physics Engine 3.3 XNA\Farseer Physics XNA.csproj">
+      <Project>{0A850700-1ABB-4288-A391-6726B90EBEB9}</Project>
+      <Name>Farseer Physics XNA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GameStateManagement\GameStateManagement %28Windows%29.csproj">
+      <Project>{0A551D79-F37E-4529-9CA0-3FD2E9EA715E}</Project>
+      <Name>GameStateManagement %28Windows%29</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Juego2DContent\Juego2DContent.contentproj">
       <Name>Juego2DContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
