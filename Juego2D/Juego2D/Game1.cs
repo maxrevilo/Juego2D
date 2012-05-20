@@ -18,6 +18,9 @@ namespace Juego2D
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferHeight = 600;
+            graphics.PreferredBackBufferWidth = 1024;
+
             Content.RootDirectory = "Content";
             
             // Create the screen factory and add it to the Services

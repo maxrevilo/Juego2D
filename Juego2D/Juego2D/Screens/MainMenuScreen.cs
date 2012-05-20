@@ -20,11 +20,13 @@ namespace Juego2D
         {
             // Create our menu entries.
             MenuEntry playGameMenuEntry = new MenuEntry("Pliau!!!");
+            MenuEntry levelSelectMenuEntry = new MenuEntry("Level Select");
             MenuEntry optionsMenuEntry = new MenuEntry("Options");
             MenuEntry exitMenuEntry = new MenuEntry("Exit");
 
             // Hook up menu event handlers.
             playGameMenuEntry.Selected += PlayGameMenuEntrySelected;
+            playGameMenuEntry.Selected += LevelSelectEntrySelected;
             optionsMenuEntry.Selected += OptionsMenuEntrySelected;
             exitMenuEntry.Selected += OnCancel;
 
@@ -45,7 +47,16 @@ namespace Juego2D
         /// </summary>
         void PlayGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            //LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
+            LevelLoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
+                               new FirstLevel());
+        }
+
+        /// <summary>
+        /// Event handler for when the Play Game menu entry is selected.
+        /// </summary>
+        void LevelSelectEntrySelected(object sender, PlayerIndexEventArgs e)
+        {
+            //LevelLoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
             //                   new GameplayScreen());
         }
 
