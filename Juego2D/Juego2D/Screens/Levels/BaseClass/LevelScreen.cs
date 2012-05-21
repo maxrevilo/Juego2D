@@ -27,14 +27,17 @@ namespace Juego2D
 
         InputAction pauseAction, zoomInAction, zoomOutAction;
 
+        InputAction moveRightAction, moveLeftAction, moveUpAction, moveDownAction;
+
         #endregion
 
         private DebugViewXNA debugView;
 
-        protected World world;
-        protected Camera2D camera;
+        protected GameWorld world;
+        protected Camera2D camera { get { return world.camera; } }
         protected Player player;
         protected Scenario scenario;
+        protected Texture2D background;
 
         #region Initialization
 
@@ -54,15 +57,38 @@ namespace Juego2D
 
             zoomInAction = new InputAction(
                 null,
-                new Keys[] {Keys.Up},
+                new Keys[] {Keys.Q},
                 false);
 
             zoomOutAction = new InputAction(
                 null,
-                new Keys[] { Keys.Down },
+                new Keys[] { Keys.E },
                 false);
 
-            camera = null;
+
+            #region player controls:
+            moveDownAction = new InputAction(
+                null,
+                new Keys[] { Keys.S, Keys.Down },
+                false);
+
+            moveUpAction = new InputAction(
+                null,
+                new Keys[] { Keys.W, Keys.Up },
+                false);
+
+            moveRightAction = new InputAction(
+                null,
+                new Keys[] { Keys.D, Keys.Right },
+                false);
+
+            moveLeftAction = new InputAction(
+                null,
+                new Keys[] { Keys.A, Keys.Left },
+                false);
+            #endregion
+
+
             world = null;
 
             player = null;
@@ -84,12 +110,11 @@ namespace Juego2D
 
                 gameFont = ScreenManager.Font;
 
-                world = new World(0.98f * Vector2.UnitY);
-                camera = new Camera2D(ScreenManager.GraphicsDevice);
+                world = new GameWorld(9.8f * Vector2.UnitY, 0.4f, new Camera2D(ScreenManager.GraphicsDevice));
 
                 player = new Player(this, world, camera);
                 player.Initialize();
-                player.getBody(0).Position = new Vector2(400, 300);
+                player.Position = new Vector2(10, 20);
 
                 scenario = new Scenario(this, world, camera);
                 scenario.Initialize();
@@ -99,8 +124,9 @@ namespace Juego2D
                 camera.Jump2Target();
 
                 debugView = new DebugViewXNA(world);
-                debugView.AppendFlags(DebugViewFlags.DebugPanel);
-                debugView.DefaultShapeColor = Color.White;
+                debugView.AppendFlags(DebugViewFlags.DebugPanel | DebugViewFlags.PerformanceGraph);
+                debugView.AppendFlags(DebugViewFlags.ContactNormals | DebugViewFlags.ContactPoints);
+                debugView.DefaultShapeColor = Color.Black;
                 debugView.SleepingShapeColor = Color.LightGray;
 
                 #endregion
@@ -114,6 +140,11 @@ namespace Juego2D
         protected virtual void loadContent(ContentManager content) {
             player.loadContent(content);
             scenario.loadContent(content);
+
+            if (background == null)
+            {
+                background = content.Load<Texture2D>("Levels/FondoTest");
+            }
 
             debugView.LoadContent(ScreenManager.Game.GraphicsDevice, content);
         }
@@ -181,7 +212,10 @@ namespace Juego2D
         protected virtual void UpdatePlaying(GameTime gameTime)
         {
             float seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            player.Update(gameTime);
+
             world.Step(seconds);
+            
         }
 
 
@@ -200,10 +234,6 @@ namespace Juego2D
             KeyboardState keyboardState = input.CurrentKeyboardStates[playerIndex];
             GamePadState gamePadState = input.CurrentGamePadStates[playerIndex];
 
-            // The game pauses either if the user presses the pause button, or if
-            // they unplug the active gamepad. This requires us to keep track of
-            // whether a gamepad was ever plugged in, because we don't want to pause
-            // on PC if they are playing with a keyboard and have no gamepad at all!
             bool gamePadDisconnected = !gamePadState.IsConnected &&
                                        input.GamePadWasConnected[playerIndex];
 
@@ -226,9 +256,26 @@ namespace Juego2D
         /// <param name="gameTime"></param>
         protected virtual void OnGameHandleInput(GameTime gameTime, InputState input)
         {
-            PlayerIndex player;
-            if      (zoomInAction.Evaluate(input, ControllingPlayer, out player))  camera.Zoom *= 1.2f;
-            else if (zoomOutAction.Evaluate(input, ControllingPlayer, out player)) camera.Zoom *= 0.8f;
+            float time = (float) gameTime.ElapsedGameTime.TotalMilliseconds * 0.001f;
+
+            PlayerIndex playerI;
+            if      (zoomInAction.Evaluate(input, ControllingPlayer, out playerI))  camera.Zoom *= 1.2f;
+            else if (zoomOutAction.Evaluate(input, ControllingPlayer, out playerI)) camera.Zoom *= 0.8f;
+
+            if (moveRightAction.Evaluate(input, ControllingPlayer, out playerI))
+            {
+                player.moveRight(time);
+            }
+            else if (moveLeftAction.Evaluate(input, ControllingPlayer, out playerI))
+            {
+                player.moveLeft(time);
+            }
+            else player.stopMoving();
+
+            if (moveUpAction.Evaluate(input, ControllingPlayer, out playerI))
+            {
+                player.moveUp(0f);
+            }
         }
 
 
@@ -238,8 +285,12 @@ namespace Juego2D
         /// </summary>
         public override void Draw(GameTime gameTime)
         {
-            player.Draw(gameTime);
-            scenario.Draw(gameTime);
+            ScreenManager.SpriteBatch.Begin();
+            ScreenManager.SpriteBatch.Draw(background, new Rectangle(0,0,1024, 600) , Color.White);
+            ScreenManager.SpriteBatch.End();
+
+            //player.Draw(gameTime);
+            //scenario.Draw(gameTime);
 
             Matrix projection = camera.SimProjection, view = camera.SimView;
             debugView.RenderDebugData(ref projection, ref view);
@@ -251,7 +302,6 @@ namespace Juego2D
 
                 ScreenManager.FadeBackBufferToBlack(alpha);
             }
-
             
         }
 

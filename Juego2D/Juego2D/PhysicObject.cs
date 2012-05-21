@@ -18,6 +18,9 @@ namespace Juego2D
 {
     public abstract class PhysicObject : Microsoft.Xna.Framework.DrawableGameComponent
     {
+        #region Fields:
+
+        #region Protected:
         protected struct Physics
         {
             public World     world;
@@ -28,7 +31,12 @@ namespace Juego2D
         protected Physics    physics;
         protected Camera2D   camera;
 
-        public PhysicObject(GameScreen gameScreen, World world, Camera2D camera)
+        #endregion
+        #endregion
+
+
+
+        public PhysicObject(GameScreen gameScreen, GameWorld world, Camera2D camera)
             : base(gameScreen.ScreenManager.Game)
         {
             this.gameScreen = gameScreen;
@@ -54,6 +62,8 @@ namespace Juego2D
         }
 
         public Body getBody(int index) { return physics.bodys[index]; }
+
+        public virtual Body mainBody { get { return getBody(0); } }
 
         protected override void Dispose(bool disposing)
         {

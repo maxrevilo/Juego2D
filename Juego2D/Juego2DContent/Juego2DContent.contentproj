@@ -100,8 +100,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Levels\TestLevel.png">
-      <Name>TestLevel</Name>
+    <Compile Include="Levels\LevelT.1.png">
+      <Name>LevelT.1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Levels\fondoTest.jpg">
+      <Name>fondoTest</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

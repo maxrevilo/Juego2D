@@ -16,7 +16,7 @@
 *.ccgame
 
 # Don't ignore the drivers
-!*.dll
+#!*.dll
 
 # mstest test results
 TestResults
