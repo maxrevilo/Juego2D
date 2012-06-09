@@ -25,7 +25,6 @@ namespace Juego2D
             : base(gameScreen, world, camera)
         {
             physics.bodys = new Body[1]{ new Body(world) };
-            physics.bodys[0].Friction = 5f;
         }
 
         public override void loadContent(ContentManager contentManager)
@@ -43,13 +42,13 @@ namespace Juego2D
 
             List<Vertices> list = BayazitDecomposer.ConvexPartition(verts);
 
-            List<Fixture> compund = FixtureFactory.AttachCompoundPolygon(list, 1, physics.bodys[0]);
+            List<Fixture> compund = FixtureFactory.AttachCompoundPolygon(list, 1, mainBody);
+
+            mainBody.Friction = 1.4f;
         }
 
         public override void Initialize()
         {
-
-
             base.Initialize();
         }
 

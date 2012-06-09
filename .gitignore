@@ -7,6 +7,7 @@
 # VS2010 Files
 *.suo
 *.csproj.user
+*.contentproj.user
 
 # XNA Files
 */bin/*

@@ -1,3 +1,0 @@
-D:\Proyects\Graficas 3\Farseer Physics Engine 3.3.1 Samples XNA\DebugView XNA\Content\obj\x86\Debug\ResolveAssemblyReference.cache
-D:\Proyects\Graficas 3\XNA Libs\Farseer Physics Engine 3.3.1 Samples XNA\DebugView XNA\Content\obj\x86\Debug\ResolveAssemblyReference.cache
-D:\Proyects\Graficas 3\Juego2D\DebugView XNA\Content\obj\x86\Debug\ResolveAssemblyReference.cache
