@@ -114,11 +114,12 @@ namespace Juego2D
 
                 player = new Player(this, world, camera);
                 player.Initialize();
-                player.Position = new Vector2(10, 20);
+                player.Position = new Vector2(0, 50);
 
                 scenario = new Scenario(this, world, camera);
                 scenario.Initialize();
-                
+
+                camera.Zoom = 5f;
                 camera.TrackingBody = player.getBody(0);
                 camera.Update(new GameTime());
                 camera.Jump2Target();
@@ -214,6 +215,8 @@ namespace Juego2D
             float seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
             player.Update(gameTime);
 
+            debugView.DrawString(5, 5, "Cat speed: {0}", player.mainBody.LinearVelocity.Length());
+
             world.Step(seconds);
             
         }
@@ -259,23 +262,38 @@ namespace Juego2D
             float time = (float) gameTime.ElapsedGameTime.TotalMilliseconds * 0.001f;
 
             PlayerIndex playerI;
-            if      (zoomInAction.Evaluate(input, ControllingPlayer, out playerI))  camera.Zoom *= 1.2f;
-            else if (zoomOutAction.Evaluate(input, ControllingPlayer, out playerI)) camera.Zoom *= 0.8f;
+            if      (zoomInAction.Evaluate(input, ControllingPlayer, out playerI))  camera.Zoom *= 1.05f;
+            else if (zoomOutAction.Evaluate(input, ControllingPlayer, out playerI)) camera.Zoom *= 0.95f;
 
+            bool jumping = moveUpAction.Evaluate(input, ControllingPlayer, out playerI);
+
+            
             if (moveRightAction.Evaluate(input, ControllingPlayer, out playerI))
             {
                 player.moveRight(time);
+                if (jumping)
+                {
+                    Vector2 dir = new Vector2(0.3f, -1f);
+                    dir.Normalize();
+                    player.moveUp(0f, dir);
+                }
             }
             else if (moveLeftAction.Evaluate(input, ControllingPlayer, out playerI))
             {
                 player.moveLeft(time);
+                if (jumping)
+                {
+                    Vector2 dir = new Vector2(-0.3f, -1f);
+                    dir.Normalize();
+                    player.moveUp(0f, dir);
+                }
             }
-            else player.stopMoving();
+            else {
+                player.stopMoving();
+                if (jumping) player.moveUp(0f);
+            }
 
-            if (moveUpAction.Evaluate(input, ControllingPlayer, out playerI))
-            {
-                player.moveUp(0f);
-            }
+            
         }
 
 

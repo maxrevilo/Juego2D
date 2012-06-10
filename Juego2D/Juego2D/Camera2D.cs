@@ -7,7 +7,7 @@ namespace Juego2D
 {
     public class Camera2D
     {
-        private const float _minZoom = 0.0002f;
+        private const float _minZoom = 1f;
         private const float _maxZoom = 20f;
         private static GraphicsDevice _graphics;
 

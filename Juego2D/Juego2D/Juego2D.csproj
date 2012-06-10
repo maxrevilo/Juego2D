@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera2D.cs" />
+    <Compile Include="Collectable.cs" />
     <Compile Include="ConvertUnits.cs" />
     <Compile Include="GameWorld.cs" />
     <Compile Include="Scenario.cs" />

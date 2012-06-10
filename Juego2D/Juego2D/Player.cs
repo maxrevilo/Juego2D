@@ -22,7 +22,7 @@ namespace Juego2D
 {
     public class Player : PhysicObject
     {
-        private const float wheelsFriction = 1.0f, speed = 40f, jumpImpulse = 6.7f;
+        private const float wheelsFriction = 1.0f, speed = 37f, jumpImpulse = 4.7f;
         
 
         private uint rightwheelContacts;
@@ -109,6 +109,8 @@ namespace Juego2D
             StabilizeJoint.TargetAngle = 0;
 
             mainBody.Restitution = 0f;
+            mainBody.CollisionCategories = Category.Cat2;
+            mainBody.CollidesWith = Category.Cat1 | Category.Cat3;
 
             base.Initialize();
         }
@@ -189,7 +191,7 @@ namespace Juego2D
 
         #region controls:
         private Vector2 moveForce(Vector2 local_direction, bool traction = true) {
-            float tractionCoef = traction ? Math.Min(wheelsFriction, wheelFCoef) * Math.Min(wheelNimpulse, 1f) : 0.05f;
+            float tractionCoef = traction ? Math.Min(wheelsFriction, wheelFCoef) * Math.Min(wheelNimpulse, 0.4f) : 0.05f;
             return speed * tractionCoef * mainBody.GetWorldVector(local_direction);
         }
 
@@ -209,9 +211,14 @@ namespace Juego2D
 
         public bool moveUp(float time)
         {
+           return moveUp(time, -Vector2.UnitY);
+        }
+
+        public bool moveUp(float time, Vector2 direction)
+        {
             if (wheelContacts > 0 && !jumped)
             {
-                mainBody.ApplyLinearImpulse(mainBody.GetWorldVector(-Vector2.UnitY) * jumpImpulse);
+                mainBody.ApplyLinearImpulse(mainBody.GetWorldVector(direction) * jumpImpulse);
                 jumped = true;
                 return true;
             }
