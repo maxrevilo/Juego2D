@@ -49,8 +49,15 @@ namespace Juego2D
         }
 
         private FixedAngleJoint StabilizeJoint;
-        private bool jumped;
+        private bool moving;
+        private bool jumped { get { return jumpedTime < .2; } }
+        private float timeOnAir, jumpedTime;
+        private bool lookingLeft;
 
+        public bool onAir { get { return timeOnAir > 0.2f; } }
+        public bool isMoving { get { return moving; } }
+
+        public float[] WheelContacs { get { return new float[]{rightwheelContacts, leftwheelContacts, rightwheelNimpulse, leftwheelNimpulse}; }}
 
         public Fixture WheelR { get; set;}
         public Fixture WheelL { get; set;}
@@ -61,6 +68,7 @@ namespace Juego2D
         }
 
         protected Texture2D image;
+        protected SpriteSheet sprite, standSprite, runSprite, walkSprite, fallSprite;
 
         #region Construction&Loading:
         public Player(GameScreen gameScreen, GameWorld world, Camera2D camera)
@@ -68,7 +76,10 @@ namespace Juego2D
         {
             rightwheelContacts = 0;
             leftwheelContacts = 0;
-            jumped = false;
+            jumpedTime = 0f;
+            lookingLeft = false;
+            timeOnAir = 0f;
+            moving = false;
 
             resetNTImpulses();
         }
@@ -77,6 +88,61 @@ namespace Juego2D
         {
             image = new Texture2D(gameScreen.ScreenManager.Game.GraphicsDevice, 1, 1);
             image.SetData<Color>(new Color[1] { Color.White });
+
+            //WALK SPRITE:
+            walkSprite = new SpriteSheet(
+                gameScreen.ScreenManager.Game, 
+                contentManager.Load<Texture2D>("walkSprite"), 
+                2, 5,
+                gameScreen.ScreenManager.SpriteBatch)
+                {
+                    framesPerSecond = 10f,
+                    rotationCenter = new Vector2(128, 152),
+                    depth = .5f,
+                };
+            walkSprite.scale = 2f / walkSprite.Width;
+
+            //RUN SPRITE:
+            runSprite = new SpriteSheet(
+                gameScreen.ScreenManager.Game,
+                contentManager.Load<Texture2D>("runSprite"),
+                2, 5,
+                gameScreen.ScreenManager.SpriteBatch)
+            {
+                framesPerSecond = 10f,
+                rotationCenter = new Vector2(128, 152),
+                depth = .5f,
+            };
+            runSprite.scale = 2f / runSprite.Width;
+            
+            //FALL SPRITE:
+            fallSprite = new SpriteSheet(
+                gameScreen.ScreenManager.Game,
+                contentManager.Load<Texture2D>("fallSprite"),
+                2, 3,
+                gameScreen.ScreenManager.SpriteBatch)
+            {
+                framesPerSecond = 6f,
+                rotationCenter = new Vector2(128, 152),
+                depth = .5f,
+            };
+            fallSprite.scale = 2f / fallSprite.Width;
+
+            standSprite = new SpriteSheet(
+                gameScreen.ScreenManager.Game,
+                contentManager.Load<Texture2D>("standSprite"),
+                2, 3,
+                gameScreen.ScreenManager.SpriteBatch)
+            {
+                framesPerSecond = 3f,
+                rotationCenter = new Vector2(128, 152),
+                depth = .5f,
+            };
+            standSprite.scale = 2f / standSprite.Width;
+
+
+            sprite = fallSprite;
+
         }
 
         public override void Initialize()
@@ -105,8 +171,7 @@ namespace Juego2D
             WheelR.OnSeparation   += WheelSeparateHandler;
             
             StabilizeJoint = JointFactory.CreateFixedAngleJoint(physics.world, mainBody);
-            StabilizeJoint.MaxImpulse = 1f / 200f;
-            StabilizeJoint.TargetAngle = 0;
+
 
             mainBody.Restitution = 0f;
             mainBody.CollisionCategories = Category.Cat2;
@@ -128,6 +193,7 @@ namespace Juego2D
         {
             float seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            #region Stabilization:
             //Correcting angle:
             mainBody.Rotation = mainBody.Rotation % MathHelper.TwoPi;
             //This object wont get high algunar speeds:
@@ -145,7 +211,13 @@ namespace Juego2D
                 else
                 {
                     StabilizeJoint.Enabled = true;
-                    StabilizeJoint.TargetAngle = 0;
+                    StabilizeJoint.MaxImpulse = 1 / 200f;
+                    StabilizeJoint.TargetAngle = 0f;
+                    if (onAir)
+                    {
+                        StabilizeJoint.MaxImpulse = float.MaxValue;
+                        StabilizeJoint.TargetAngle = MathHelper.ToRadians(lookingLeft ? 20f : -20f);
+                    }
                 }
             }
             else
@@ -160,30 +232,62 @@ namespace Juego2D
                 {
                 }
             }
+            #endregion
 
-            resetNTImpulses();
+            
 
-            if (wheelContacts == 0) jumped = false;
+            if (wheelContacts == 0) timeOnAir += seconds;
+            else timeOnAir = 0f;
+            jumpedTime += seconds;
+
+            float linearSpeed = mainBody.LinearVelocity.Length();
+            if (!onAir && isMoving)
+            {
+                
+                if (linearSpeed < 10f)
+                {
+                    sprite = walkSprite;
+                    sprite.framesPerSecond = Geom.line(linearSpeed, 0f, 4f, 10f, 18f);
+                }
+                else
+                {
+                    sprite = runSprite;
+                    sprite.framesPerSecond = Geom.line(linearSpeed, 10f, 8f, 20f, 24f);
+                }
+                sprite.play();
+            }
+            else if (onAir)
+            {
+                sprite = fallSprite;
+                sprite.play();
+            }
+            else if (linearSpeed > 0.1f)
+            {
+                sprite = runSprite;
+                sprite.gotoAndStop(9);
+            }
+            else
+            {
+                sprite = standSprite;
+                sprite.play();
+            }
+
+            if(mainBody.Awake) resetNTImpulses();
+
+            sprite.rotation = getBody(0).Rotation;
+            sprite.position = getBody(0).Position;
+            sprite.Update(gameTime);
 
             base.Update(gameTime);
+
+            
         }
 
         public override void Draw(GameTime gameTime)
         {
-            
-            SpriteBatch spriteBatch = gameScreen.ScreenManager.SpriteBatch;
-            Viewport viewport = gameScreen.ScreenManager.GraphicsDevice.Viewport;
-            Vector2 pos;
-            float size = 2f * getBody(0).FixtureList[0].Shape.Radius;
-            pos.X = physics.bodys[0].Position.X - size/2f;
-            pos.Y = physics.bodys[0].Position.Y - size/2f;
-            float scale = size / image.Width;
-
-            spriteBatch.Begin(0, null, null, null, null, null, camera.View );
-
-            spriteBatch.Draw(image, pos, null, Color.Red, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
-
-            spriteBatch.End();
+            sprite.spriteEffects = lookingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+            sprite.view = camera.View;
+            sprite.Draw(gameTime);
 
             base.Draw(gameTime);
         }
@@ -197,6 +301,7 @@ namespace Juego2D
 
         public bool moveRight(float time)
         {
+            lookingLeft = false;
             startMoving();
             mainBody.ApplyLinearImpulse(moveForce(Vector2.UnitX, wheelContacts > 0) * time);
             return true;
@@ -204,6 +309,7 @@ namespace Juego2D
 
         public bool moveLeft(float time)
         {
+            lookingLeft = true;
             startMoving();
             mainBody.ApplyLinearImpulse(moveForce(-Vector2.UnitX, wheelContacts > 0) * time);
             return true;
@@ -218,8 +324,18 @@ namespace Juego2D
         {
             if (wheelContacts > 0 && !jumped)
             {
+                //Posibly wall jump:
+                if (rightwheelContacts == 0 || leftwheelContacts == 0)
+                {
+                    lookingLeft = leftwheelContacts == 0;
+                    direction = new Vector2(0.3f, -1f);
+                    if (lookingLeft) direction.X *= -1f;
+                    direction.Normalize();
+                }
+
                 mainBody.ApplyLinearImpulse(mainBody.GetWorldVector(direction) * jumpImpulse);
-                jumped = true;
+                jumpedTime = 0f;
+                
                 return true;
             }
             else return false;
@@ -229,14 +345,18 @@ namespace Juego2D
         {
             WheelL.Friction = 0;
             WheelR.Friction = 0;
+            moving = true;
         }
 
         public void stopMoving()
         {
             WheelL.Friction = wheelsFriction;
             WheelR.Friction = wheelsFriction;
+            moving = false;
         }
         #endregion
+
+        #region functions:
         private void resetNTImpulses()
         {
             leftwheelNimpulse  = 0f;
@@ -245,6 +365,9 @@ namespace Juego2D
             rightwheelTimpulse = 0f;
             leftwheelFCoef     = 0f;
             rightwheelFCoef    = 0f;
+
+            rightwheelContacts = 0;
+            leftwheelContacts = 0;
         }
 
         private void WheelAfterContactHandler(Fixture Wheel, Fixture floor, Contact contact)
@@ -255,28 +378,32 @@ namespace Juego2D
                 leftwheelNimpulse += mfp.NormalImpulse;
                 leftwheelTimpulse += mfp.TangentImpulse;
                 leftwheelFCoef = floor.Friction;
+
+                leftwheelContacts++;
             }
             else
             {
                 rightwheelNimpulse += mfp.NormalImpulse;
                 rightwheelTimpulse += mfp.TangentImpulse;
                 rightwheelFCoef = floor.Friction;
+
+                rightwheelContacts++;
             }
         }
 
         private bool WheelContactHandler(Fixture Wheel, Fixture floor, Contact contact)
         {
-            if (Wheel == WheelL) leftwheelContacts++;
-            else rightwheelContacts++;
-
+            //if (Wheel == WheelL) leftwheelContacts++;
+            //else rightwheelContacts++;
             return true;
         }
 
         private void WheelSeparateHandler(Fixture Wheel, Fixture floor)
         {
-            if (Wheel == WheelL) leftwheelContacts--;
-            else rightwheelContacts--;
+            //if (Wheel == WheelL) leftwheelContacts--;
+            //else rightwheelContacts--;
         }
-        
+        #endregion
+
     }
 }

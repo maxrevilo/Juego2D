@@ -1,6 +1,7 @@
 ﻿#region Using Statements
 using System;
 using System.Threading;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,6 +11,11 @@ using GameStateManagement;
 using FarseerPhysics;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.DebugViews;
+
+using ProjectMercury;
+using ProjectMercury.Emitters;
+using ProjectMercury.Modifiers;
+using ProjectMercury.Renderers;
 #endregion
 
 namespace Juego2D
@@ -25,19 +31,31 @@ namespace Juego2D
 
         float pauseAlpha;
 
-        InputAction pauseAction, zoomInAction, zoomOutAction;
+        InputAction pauseAction, zoomInAction, zoomOutAction, debugAction;
 
         InputAction moveRightAction, moveLeftAction, moveUpAction, moveDownAction;
 
         #endregion
 
         private DebugViewXNA debugView;
+        private SpriteFont sf;
+        private SpriteSheet simple, special;
 
         protected GameWorld world;
         protected Camera2D camera { get { return world.camera; } }
         protected Player player;
         protected Scenario scenario;
         protected Texture2D background;
+
+        protected bool debug;
+        protected bool playerControl;
+
+        protected List<Collectible> collectibles;
+        // Renderer that draws particles to screen
+        protected SpriteBatchRenderer sbRenderer;
+        protected Renderer myRenderer;
+        // Particle effect object to store the info about particle
+        protected ParticleEffect myEffect;
 
         #region Initialization
 
@@ -53,6 +71,11 @@ namespace Juego2D
             pauseAction = new InputAction(
                 new Buttons[] { Buttons.Start, Buttons.Back },
                 new Keys[] { Keys.Escape },
+                true);
+
+            debugAction = new InputAction(
+                new Buttons[0],
+                new Keys[] { Keys.F1 },
                 true);
 
             zoomInAction = new InputAction(
@@ -73,17 +96,17 @@ namespace Juego2D
                 false);
 
             moveUpAction = new InputAction(
-                null,
-                new Keys[] { Keys.W, Keys.Up },
+                new Buttons[] {Buttons.A, Buttons.DPadUp },
+                new Keys[] { Keys.W, Keys.Up, Keys.Space },
                 false);
 
             moveRightAction = new InputAction(
-                null,
+                new Buttons[] { Buttons.DPadRight, Buttons.LeftThumbstickRight },
                 new Keys[] { Keys.D, Keys.Right },
                 false);
 
             moveLeftAction = new InputAction(
-                null,
+                new Buttons[] { Buttons.DPadLeft, Buttons.LeftThumbstickLeft },
                 new Keys[] { Keys.A, Keys.Left },
                 false);
             #endregion
@@ -93,6 +116,9 @@ namespace Juego2D
 
             player = null;
             scenario = null;
+            debug = false;
+
+            playerControl = true;
         }
 
 
@@ -119,7 +145,9 @@ namespace Juego2D
                 scenario = new Scenario(this, world, camera);
                 scenario.Initialize();
 
-                camera.Zoom = 5f;
+                camera.Zoom = 7f;
+                camera.trakingSpeedMult = new Vector2(0.5f, 0.25f);
+                camera.trakingOffset = new Vector2(0f, -2f);
                 camera.TrackingBody = player.getBody(0);
                 camera.Update(new GameTime());
                 camera.Jump2Target();
@@ -130,6 +158,16 @@ namespace Juego2D
                 debugView.DefaultShapeColor = Color.Black;
                 debugView.SleepingShapeColor = Color.LightGray;
 
+                collectibles = new List<Collectible>();
+                myEffect = new ParticleEffect();
+                myRenderer = new SpriteBatchRenderer
+                {
+                    GraphicsDeviceService = (IGraphicsDeviceService)ScreenManager.Game.Services.GetService(typeof(IGraphicsDeviceService))
+                };
+                sbRenderer = new SpriteBatchRenderer
+                {
+                    GraphicsDeviceService = (IGraphicsDeviceService)ScreenManager.Game.Services.GetService(typeof(IGraphicsDeviceService))
+                };
                 #endregion
 
                 loadContent(content);
@@ -142,10 +180,30 @@ namespace Juego2D
             player.loadContent(content);
             scenario.loadContent(content);
 
+            sf = content.Load<SpriteFont>("Fonts/gamefont");
+
             if (background == null)
             {
                 background = content.Load<Texture2D>("Levels/FondoTest");
             }
+
+            foreach (Collectible c in collectibles)
+            {
+                c.loadContent(content);
+            }
+
+            myEffect = content.Load<ParticleEffect>(@"Particles/BasicExplosion");
+            myEffect.LoadContent(content);
+            myEffect.Initialise();
+            myRenderer.LoadContent(content);
+            sbRenderer.LoadContent(content);
+
+            special = new SpriteSheet(ScreenManager.Game, content.Load<Texture2D>("collectiblePez"), 2,2, ScreenManager.SpriteBatch);
+            special.scale = 40f / special.frameWidth;
+
+            simple = new SpriteSheet(ScreenManager.Game, content.Load<Texture2D>("collectibleLeche"), 2, 2, ScreenManager.SpriteBatch);
+            simple.scale = 40f / simple.frameWidth;
+            simple.gotoAndStop(1);
 
             debugView.LoadContent(ScreenManager.Game.GraphicsDevice, content);
         }
@@ -158,6 +216,8 @@ namespace Juego2D
             content.Unload();
             player.Dispose();
             scenario.Dispose();
+            myRenderer.Dispose();
+            sbRenderer.Dispose();
         }
 
 
@@ -215,10 +275,28 @@ namespace Juego2D
             float seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
             player.Update(gameTime);
 
-            debugView.DrawString(5, 5, "Cat speed: {0}", player.mainBody.LinearVelocity.Length());
+            float ZoomTarget = Geom.line(player.mainBody.LinearVelocity.Length(), 0f, 9f, 14f, 4f);
+            float ZoomDif = camera.Zoom - ZoomTarget;
+            float ZoomSign = Math.Sign(ZoomDif);
+            double inertia;
 
+            if (ZoomSign < 0f) inertia = Math.Pow(-ZoomDif / 2.5f, 1.2f);
+            else inertia = Math.Pow(4f*ZoomDif, 1.7f);
+
+            camera.Zoom -= seconds * (float)inertia * ZoomSign;
             world.Step(seconds);
-            
+
+            foreach (Collectible c in collectibles)
+            {
+                c.Update(gameTime);
+                if (c.shootParticles == true)
+                {
+                    c.shootParticles = false;
+                    myEffect.Trigger(c.Position);
+                }
+            }
+            myEffect.Update(seconds);
+
         }
 
 
@@ -243,7 +321,7 @@ namespace Juego2D
             PlayerIndex player;
             if (pauseAction.Evaluate(input, ControllingPlayer, out player) || gamePadDisconnected)
             {
-                //ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
+                ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
             }
             else
             {
@@ -265,32 +343,39 @@ namespace Juego2D
             if      (zoomInAction.Evaluate(input, ControllingPlayer, out playerI))  camera.Zoom *= 1.05f;
             else if (zoomOutAction.Evaluate(input, ControllingPlayer, out playerI)) camera.Zoom *= 0.95f;
 
-            bool jumping = moveUpAction.Evaluate(input, ControllingPlayer, out playerI);
+            if (debugAction.Evaluate(input, ControllingPlayer, out playerI)) debug = !debug;
 
-            
-            if (moveRightAction.Evaluate(input, ControllingPlayer, out playerI))
+            if (playerControl)
             {
-                player.moveRight(time);
-                if (jumping)
+                bool jumping = moveUpAction.Evaluate(input, ControllingPlayer, out playerI);
+
+
+                if (moveRightAction.Evaluate(input, ControllingPlayer, out playerI))
                 {
-                    Vector2 dir = new Vector2(0.3f, -1f);
-                    dir.Normalize();
-                    player.moveUp(0f, dir);
+                    player.moveRight(time);
+                    if (jumping)
+                    {
+                        Vector2 dir = new Vector2(0.3f, -1f);
+                        dir.Normalize();
+                        player.moveUp(0f, dir);
+                    }
                 }
-            }
-            else if (moveLeftAction.Evaluate(input, ControllingPlayer, out playerI))
-            {
-                player.moveLeft(time);
-                if (jumping)
+                else if (moveLeftAction.Evaluate(input, ControllingPlayer, out playerI))
                 {
-                    Vector2 dir = new Vector2(-0.3f, -1f);
-                    dir.Normalize();
-                    player.moveUp(0f, dir);
+                    player.moveLeft(time);
+                    if (jumping)
+                    {
+                        Vector2 dir = new Vector2(-0.3f, -1f);
+                        dir.Normalize();
+                        player.moveUp(0f, dir);
+                    }
                 }
-            }
-            else {
-                player.stopMoving();
-                if (jumping) player.moveUp(0f);
+                else
+                {
+                    player.stopMoving();
+                    if (jumping) player.moveUp(0f);
+                }
+
             }
 
             
@@ -303,15 +388,56 @@ namespace Juego2D
         /// </summary>
         public override void Draw(GameTime gameTime)
         {
+            Viewport vp = ScreenManager.Game.GraphicsDevice.Viewport;
+
             ScreenManager.SpriteBatch.Begin();
-            ScreenManager.SpriteBatch.Draw(background, new Rectangle(0,0,1024, 600) , Color.White);
+            ScreenManager.SpriteBatch.Draw(background, new Rectangle(0, 0, vp.Width, vp.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
             ScreenManager.SpriteBatch.End();
 
-            //player.Draw(gameTime);
-            //scenario.Draw(gameTime);
+            ScreenManager.SpriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, null, null, null, null, camera.View);
+
+            
+
+            player.Draw(gameTime);
+            scenario.Draw(gameTime);
+
+            foreach (Collectible c in collectibles) c.Draw(gameTime);
+            ScreenManager.SpriteBatch.End();
+
+            ScreenManager.SpriteBatch.Begin(0, null, null, null, null, null, camera.View);
+            sbRenderer.RenderEffect(myEffect, ScreenManager.SpriteBatch);
+            ScreenManager.SpriteBatch.End();
+
+            
+            ScreenManager.SpriteBatch.Begin();
+            simple.position = new Vector2(vp.Width - 175, 35);
+            simple.Draw(gameTime);
+            ScreenManager.SpriteBatch.DrawString(sf, 
+                String.Format("{0}", UserProfileManger.getProfile().simpleRecolected), 
+                new Vector2(vp.Width - 150, 30), Color.GreenYellow);
+
+            special.position = new Vector2(vp.Width - 175, 75);
+            special.Draw(gameTime);
+            ScreenManager.SpriteBatch.DrawString(sf,
+                String.Format("{0}", UserProfileManger.getProfile().specialRecoleced), 
+                new Vector2(vp.Width - 150, 60), Color.GreenYellow);
+                
+            ScreenManager.SpriteBatch.End();
+
 
             Matrix projection = camera.SimProjection, view = camera.SimView;
-            debugView.RenderDebugData(ref projection, ref view);
+            if (debug)
+            {
+                debugView.RenderDebugData(ref projection, ref view);
+
+                debugView.BeginCustomDraw(ref projection, ref view);
+                debugView.DrawPoint(camera.TargetPosition, 0.1f, Color.Red);
+
+                debugView.DrawString(5, 5, "Cat speed: {0}\nposition {1}", player.mainBody.LinearVelocity.Length(), player.Position);
+                debugView.DrawString(300, 5, "RCont {0}, LCont {1},RImp {2}, LImp {3}\nNormal Collect {4}\nSpecial Collect {5}", player.WheelContacs[0], player.WheelContacs[1], player.WheelContacs[2], player.WheelContacs[3], UserProfileManger.getProfile().simpleRecolected, UserProfileManger.getProfile().specialRecoleced);
+            
+                debugView.EndCustomDraw();
+            }
 
             // If the game is transitioning on or off, fade it out to black.
             if (TransitionPosition > 0 || pauseAlpha > 0)

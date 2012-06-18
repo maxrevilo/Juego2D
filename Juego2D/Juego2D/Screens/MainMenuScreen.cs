@@ -16,13 +16,13 @@ namespace Juego2D
         /// Constructor fills in the menu contents.
         /// </summary>
         public MainMenuScreen()
-            : base("Main Menu")
+            : base("Hungry Cat")
         {
             // Create our menu entries.
             MenuEntry playGameMenuEntry = new MenuEntry("Pliau!!!");
-            MenuEntry levelSelectMenuEntry = new MenuEntry("Level Select");
-            MenuEntry optionsMenuEntry = new MenuEntry("Options");
-            MenuEntry exitMenuEntry = new MenuEntry("Exit");
+            //MenuEntry levelSelectMenuEntry = new MenuEntry("Seleccionar Nivel");
+            MenuEntry optionsMenuEntry = new MenuEntry("Opciones");
+            MenuEntry exitMenuEntry = new MenuEntry("Salir");
 
             // Hook up menu event handlers.
             playGameMenuEntry.Selected += PlayGameMenuEntrySelected;
@@ -75,7 +75,7 @@ namespace Juego2D
         /// </summary>
         protected override void OnCancel(PlayerIndex playerIndex)
         {
-            const string message = "Do you want to leave me? =(";
+            const string message = "Quieres dejar de jugar? =(";
 
             MessageBoxScreen confirmExitMessageBox = new MessageBoxScreen(message);
 

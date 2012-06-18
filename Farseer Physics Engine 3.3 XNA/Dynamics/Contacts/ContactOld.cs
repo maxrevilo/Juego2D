@@ -343,20 +343,17 @@ namespace FarseerPhysics.Dynamics.Contacts
             if (wasTouching == false && touching)
             {
                 //Report the collision to both participants:
-				if (FixtureA.OnCollision != null)
-					foreach (OnCollisionEventHandler handler in FixtureA.OnCollision.GetInvocationList())
-						Enabled = handler(FixtureA, FixtureB, this) && Enabled;
+                if (FixtureA.OnCollision != null)
+                    Enabled = FixtureA.OnCollision(FixtureA, FixtureB, this);
 
                 //Reverse the order of the reported fixtures. The first fixture is always the one that the
                 //user subscribed to.
-				if (FixtureB.OnCollision != null)
-					foreach (OnCollisionEventHandler handler in FixtureB.OnCollision.GetInvocationList())
-						Enabled = handler(FixtureB, FixtureA, this) && Enabled;
+                if (FixtureB.OnCollision != null)
+                    Enabled = FixtureB.OnCollision(FixtureB, FixtureA, this);
 
                 //BeginContact can also return false and disable the contact
-				if (contactManager.BeginContact != null)
-					foreach (BeginContactDelegate handler in contactManager.BeginContact.GetInvocationList())
-						Enabled = handler(this) && Enabled;
+                if (contactManager.BeginContact != null)
+                    Enabled = contactManager.BeginContact(this);
 
                 //if the user disabled the contact (needed to exclude it in TOI solver), we also need to mark
                 //it as not touching.

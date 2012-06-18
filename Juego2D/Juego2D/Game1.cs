@@ -18,8 +18,9 @@ namespace Juego2D
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferHeight = 600;
-            graphics.PreferredBackBufferWidth = 1024;
+            graphics.PreferredBackBufferHeight = 1080;
+            graphics.PreferredBackBufferWidth = 1440;
+            graphics.ToggleFullScreen();
 
             Content.RootDirectory = "Content";
             

@@ -110,9 +110,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Camera2D.cs" />
+    <Compile Include="Screens\ConfirmBoxScreen.cs" />
+    <Compile Include="Screens\Levels\BaseClass\PuseMenuScreen.cs" />
+    <Compile Include="SpecialCollectible.cs" />
+    <Compile Include="SimpleCollectible.cs" />
+    <Compile Include="Utils\Camera2D.cs" />
     <Compile Include="Collectable.cs" />
-    <Compile Include="ConvertUnits.cs" />
+    <Compile Include="Utils\ConvertUnits.cs" />
     <Compile Include="GameWorld.cs" />
     <Compile Include="Scenario.cs" />
     <Compile Include="PhysicObject.cs" />
@@ -133,6 +137,8 @@
     <Compile Include="Screens\MessageBoxScreen.cs" />
     <Compile Include="Screens\OptionsMenuScreen.cs" />
     <Compile Include="Screens\ScreenFactory.cs" />
+    <Compile Include="Utils\Geom.cs" />
+    <Compile Include="Utils\SpriteSheet.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

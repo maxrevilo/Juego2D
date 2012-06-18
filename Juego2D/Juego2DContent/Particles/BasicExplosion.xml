@@ -12,7 +12,7 @@
         <Variation>128</Variation>
       </ReleaseSpeed>
       <ReleaseColour>
-        <Value>0.5019608 0.5019608 0.5019608</Value>
+        <Value>0.3 0.3 1.0</Value>
         <Variation>0 0 0</Variation>
       </ReleaseColour>
       <ReleaseOpacity>
@@ -20,8 +20,8 @@
         <Variation>0</Variation>
       </ReleaseOpacity>
       <ReleaseScale>
-        <Value>16</Value>
-        <Variation>0</Variation>
+        <Value>1</Value>
+        <Variation>0.1</Variation>
       </ReleaseScale>
       <ReleaseRotation>
         <Value>0</Value>
@@ -35,8 +35,8 @@
           <Ultimate>0</Ultimate>
         </Item>
         <Item Type="Modifiers:ScaleModifier">
-          <InitialScale>48</InitialScale>
-          <UltimateScale>255</UltimateScale>
+          <InitialScale>1</InitialScale>
+          <UltimateScale>3</UltimateScale>
         </Item>
         <Item Type="Modifiers:DampingModifier">
           <DampingCoefficient>1</DampingCoefficient>
@@ -46,8 +46,8 @@
           <FinalRate>0</FinalRate>
         </Item>
         <Item Type="Modifiers:ColourModifier">
-          <InitialColour>0.305882365 0.254901975 0.211764708</InitialColour>
-          <UltimateColour>0.5019608 0.5019608 0.5019608</UltimateColour>
+          <InitialColour>0.3 0.3 1.0</InitialColour>
+          <UltimateColour>0.8 0.8 1.0</UltimateColour>
         </Item>
       </Modifiers>
       <BlendMode>Alpha</BlendMode>
@@ -65,19 +65,19 @@
       <Enabled>true</Enabled>
       <ReleaseSpeed>
         <Value>0</Value>
-        <Variation>100</Variation>
+        <Variation>2</Variation>
       </ReleaseSpeed>
       <ReleaseColour>
-        <Value>1 0.5019608 0</Value>
-        <Variation>0.3 0 0</Variation>
+        <Value>0.5 0.5 1.0</Value>
+        <Variation>0.0 0 0.2</Variation>
       </ReleaseColour>
       <ReleaseOpacity>
         <Value>1</Value>
         <Variation>0</Variation>
       </ReleaseOpacity>
       <ReleaseScale>
-        <Value>48</Value>
-        <Variation>32</Variation>
+        <Value>1</Value>
+        <Variation>0.5</Variation>
       </ReleaseScale>
       <ReleaseRotation>
         <Value>3.14</Value>
@@ -112,19 +112,19 @@
       <Enabled>true</Enabled>
       <ReleaseSpeed>
         <Value>0</Value>
-        <Variation>250</Variation>
+        <Variation>3</Variation>
       </ReleaseSpeed>
       <ReleaseColour>
-        <Value>1 0.8784314 0.7529412</Value>
-        <Variation>0 0 0</Variation>
+        <Value>1.0 1.0 1.0</Value>
+        <Variation>0.1 0.1 0.1</Variation>
       </ReleaseColour>
       <ReleaseOpacity>
         <Value>1</Value>
         <Variation>0</Variation>
       </ReleaseOpacity>
       <ReleaseScale>
-        <Value>5</Value>
-        <Variation>2</Variation>
+        <Value>0.2</Value>
+        <Variation>0.1</Variation>
       </ReleaseScale>
       <ReleaseRotation>
         <Value>0</Value>
@@ -152,7 +152,7 @@
       <ReleaseQuantity>1</ReleaseQuantity>
       <Enabled>true</Enabled>
       <ReleaseSpeed>
-        <Value>50</Value>
+        <Value>1</Value>
         <Variation>0</Variation>
       </ReleaseSpeed>
       <ReleaseColour>
@@ -164,7 +164,7 @@
         <Variation>0</Variation>
       </ReleaseOpacity>
       <ReleaseScale>
-        <Value>192</Value>
+        <Value>3</Value>
         <Variation>0</Variation>
       </ReleaseScale>
       <ReleaseRotation>

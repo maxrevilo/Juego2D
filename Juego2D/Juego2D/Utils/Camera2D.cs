@@ -7,7 +7,7 @@ namespace Juego2D
 {
     public class Camera2D
     {
-        private const float _minZoom = 1f;
+        private const float _minZoom = 0.5f;
         private const float _maxZoom = 20f;
         private static GraphicsDevice _graphics;
 
@@ -81,6 +81,8 @@ namespace Juego2D
             }
         }
 
+        public Vector2 TargetPosition { get { return _targetPosition; } }
+
         /// <summary>
         /// The furthest up, and the furthest left the camera can go.
         /// if this value equals maxPosition, then no clamping will be 
@@ -151,6 +153,9 @@ namespace Juego2D
                 _currentZoom = MathHelper.Clamp(_currentZoom, _minZoom, _maxZoom);
             }
         }
+
+        public Vector2 trakingSpeedMult;
+        public Vector2 trakingOffset;
 
         /// <summary>
         /// the body that this camera is currently tracking. 
@@ -254,6 +259,9 @@ namespace Juego2D
 
             _currentZoom = 1f;
 
+            trakingSpeedMult = Vector2.Zero;
+            trakingOffset = Vector2.Zero;
+
             SetView();
         }
 
@@ -269,7 +277,7 @@ namespace Juego2D
         {
             Matrix matRotation = Matrix.CreateRotationZ(_currentRotation);
             Vector3 translateCenter = new Vector3(_translateCenter, 0f);
-            Matrix scaleMatrix = Matrix.CreateScale(_currentZoom);
+            Matrix scaleMatrix = Matrix.CreateScale(_currentZoom, _currentZoom, 0f);
             Vector3 translateBody = new Vector3(-_currentPosition, 0f);
 
             _view = Matrix.CreateTranslation(translateBody) *
@@ -296,7 +304,7 @@ namespace Juego2D
             {
                 if (_positionTracking)
                 {
-                    _targetPosition = _trackingBody.Position;
+                    _targetPosition = _trackingBody.Position + _trackingBody.LinearVelocity * trakingSpeedMult + trakingOffset;
                     if (_minPosition != _maxPosition)
                     {
                         Vector2.Clamp(ref _targetPosition, ref _minPosition, ref _maxPosition, out _targetPosition);
@@ -320,7 +328,7 @@ namespace Juego2D
             float inertia;
             if (distance < 10f)
             {
-                inertia = (float)Math.Pow(distance / 10.0, 2.0);
+                inertia = (float)Math.Pow(distance / 16.0, 1.5f);
             }
             else
             {

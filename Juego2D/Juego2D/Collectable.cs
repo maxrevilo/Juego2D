@@ -17,7 +17,7 @@ using FarseerPhysics.Dynamics.Contacts;
 
 namespace Juego2D
 {
-    public /*abstract*/ class Collectable : Microsoft.Xna.Framework.DrawableGameComponent
+    public abstract class Collectible : Microsoft.Xna.Framework.DrawableGameComponent
     {
         #region Fields:
 
@@ -26,22 +26,34 @@ namespace Juego2D
         protected GameScreen gameScreen;
         protected Camera2D camera;
         protected Body body;
+        protected World world;
+
+        protected SpriteSheet image;
+        protected bool collected;
 
         #endregion
+
+        public bool shootParticles;
         #endregion
 
 
 
-        public Collectable(GameScreen gameScreen, Shape shape, World world, Camera2D camera)
+        public Collectible(GameScreen gameScreen, Shape shape, World world, Camera2D camera)
             : base(gameScreen.ScreenManager.Game)
         {
             this.gameScreen = gameScreen;
 
+            this.world = world;
             body = new Body(world);
             body.CreateFixture(shape);
             body.CollisionCategories = Category.Cat3;
-            body.CollidesWith = Category.None | Category.Cat2;
-            body.BodyType = BodyType.Static;
+            body.CollidesWith = Category.Cat2;
+            body.BodyType = BodyType.Kinematic;
+
+            body.OnCollision += body_OnCollision;
+
+            shootParticles = false;
+            collected = false;
 
             this.camera = camera;
         }
@@ -52,19 +64,25 @@ namespace Juego2D
             set { body.Position = value; }
         }
 
-        public /*abstract*/ void loadContent(ContentManager contentManager) {}
+        public abstract void loadContent(ContentManager contentManager);
 
         public override void Initialize()
         {
-            body.OnCollision += body_OnCollision;
             base.Initialize();
         }
 
         private bool body_OnCollision(Fixture fixtureA, Fixture fixtureB, Contact contact)
         {
-            throw new NotImplementedException();
+            if (Collected() && !collected)
+            {
+                world.RemoveBody(body);
+                collected = true;
+                shootParticles = true;
+            }
+            return false;
         }
 
+        protected abstract bool Collected();
 
         protected override void Dispose(bool disposing)
         {
@@ -75,11 +93,18 @@ namespace Juego2D
         {
             float seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            if (image != null)
+            {
+                image.position = Position;
+                image.Update(gameTime);
+            }
+
             base.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime)
         {
+            if (image != null) image.Draw(gameTime);
             base.Draw(gameTime);
         }
     }

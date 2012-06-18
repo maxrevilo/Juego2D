@@ -30,22 +30,8 @@ namespace Juego2D
 
         ContentManager content;
         Texture2D backgroundTexture;
+        SpriteSheet gat;
 
-        #endregion
-
-        #region Farseer&Mercury Test:
-        World world;
-        Body myBody;
-        CircleShape circleShape;
-        Fixture fixture;
-
-
-        // Renderer that draws particles to screen
-        Renderer myRenderer;
-        // Particle effect object to store the info about particle
-        ParticleEffect myEffect;
-
-        Texture2D tex;
         #endregion
 
         #region Initialization
@@ -58,10 +44,6 @@ namespace Juego2D
         {
             TransitionOnTime = TimeSpan.FromSeconds(0.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
-
-            #region Farseer&Mercury Test:
-            myEffect = new ParticleEffect();
-            #endregion
         }
 
 
@@ -79,36 +61,13 @@ namespace Juego2D
                 if (content == null)
                     content = new ContentManager(ScreenManager.Game.Services, "Content");
 
-                //backgroundTexture = content.Load<Texture2D>("Backgrounds/blank");
+                backgroundTexture = content.Load<Texture2D>("Backgrounds/lobby");
+                gat = new SpriteSheet(ScreenManager.Game, content.Load<Texture2D>("standSprite"), 2, 3, ScreenManager.SpriteBatch);
+                Viewport vp = ScreenManager.Game.GraphicsDevice.Viewport;
 
-
-                #region Farseer&Mercury Test:
-                myRenderer = new SpriteBatchRenderer
-                {
-                    GraphicsDeviceService = (IGraphicsDeviceService)ScreenManager.Game.Services.GetService(typeof(IGraphicsDeviceService))
-                };
-
-
-
-                world = new World(9.8f * Vector2.UnitY);
-                myBody = BodyFactory.CreateBody(world);
-                myBody.BodyType = BodyType.Dynamic;
-
-                circleShape = new CircleShape(0.5f, 1f);
-
-                fixture = myBody.CreateFixture(circleShape);
-                #endregion
-
-                #region Farseer&Mercury Test:
-                tex = new Texture2D(ScreenManager.Game.GraphicsDevice, 1, 1);
-
-                tex.SetData<Color>(new Color[1] { Color.White });
-
-                myEffect = content.Load<ParticleEffect>(@"Particles/BasicExplosion");
-                myEffect.LoadContent(content);
-                myEffect.Initialise();
-                myRenderer.LoadContent(content);
-                #endregion
+                gat.scale = 0.4f * vp.Height / gat.frameHeight;
+                gat.position = new Vector2(vp.Width * 0.08f, vp.Height * 0.8f);
+                gat.framesPerSecond = 3f;
             }
         }
 
@@ -119,10 +78,6 @@ namespace Juego2D
         public override void Unload()
         {
             content.Unload();
-
-            #region Farseer&Mercury Test:
-            myRenderer.Dispose();
-            #endregion
         }
 
 
@@ -141,24 +96,7 @@ namespace Juego2D
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
-            #region Farseer&Mercury Test:
-            float seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            world.Step(seconds);
-
-
-
-            // get the latest mouse state
-            MouseState ms = Mouse.GetState();
-            if (ms.LeftButton == ButtonState.Pressed)
-            {
-                myEffect.Trigger(new Vector2(ms.X, ms.Y));
-            }
-
-            myEffect.Update(seconds);
-            #endregion
-
-
+            gat.Update(gameTime);
             base.Update(gameTime, otherScreenHasFocus, false);
         }
 
@@ -174,21 +112,13 @@ namespace Juego2D
 
             spriteBatch.Begin();
 
-            #region Farseer&Mercury Test:
-            spriteBatch.Draw(tex, new Rectangle((int)myBody.Position.X, (int)myBody.Position.Y, 64, 64), Color.Red);
-            #endregion
-
-            /*spriteBatch.Draw(backgroundTexture, fullscreen,
+            spriteBatch.Draw(backgroundTexture, fullscreen,
                              new Color(TransitionAlpha, TransitionAlpha, TransitionAlpha));
-            */
+            gat.color = new Color(TransitionAlpha, TransitionAlpha, TransitionAlpha);
+            gat.Draw(gameTime);
+
             spriteBatch.End();
-
-            #region Farseer&Mercury Test:
-            myRenderer.RenderEffect(myEffect);
-            #endregion
         }
-
-
         #endregion
     }
 }

@@ -13,7 +13,7 @@ namespace Juego2D
     /// A popup message box screen, used to display "are you sure?"
     /// confirmation messages.
     /// </summary>
-    class MessageBoxScreen : GameScreen
+    class ConfirmBoxScreen : GameScreen
     {
         #region Fields
 
@@ -21,14 +21,12 @@ namespace Juego2D
         Texture2D gradientTexture;
 
         InputAction menuSelect;
-        InputAction menuCancel;
 
         #endregion
 
         #region Events
 
         public event EventHandler<PlayerIndexEventArgs> Accepted;
-        public event EventHandler<PlayerIndexEventArgs> Cancelled;
 
         #endregion
 
@@ -39,7 +37,7 @@ namespace Juego2D
         /// Constructor automatically includes the standard "A=ok, B=cancel"
         /// usage text prompt.
         /// </summary>
-        public MessageBoxScreen(string message)
+        public ConfirmBoxScreen(string message)
             : this(message, true)
         { }
 
@@ -48,10 +46,9 @@ namespace Juego2D
         /// Constructor lets the caller specify whether to include the standard
         /// "A=ok, B=cancel" usage text prompt.
         /// </summary>
-        public MessageBoxScreen(string message, bool includeUsageText)
+        public ConfirmBoxScreen(string message, bool includeUsageText)
         {
-            const string usageText = "\nBoton A, Espacio o Enter para confirmar." +
-                                     "\nBoton B o Esc para cancelar.";
+            const string usageText = "\n Boton A, Espacio o Enter para confirmar";
 
             if (includeUsageText)
                 this.message = message + usageText;
@@ -66,10 +63,6 @@ namespace Juego2D
             menuSelect = new InputAction(
                 new Buttons[] { Buttons.A, Buttons.Start },
                 new Keys[] { Keys.Space, Keys.Enter },
-                true);
-            menuCancel = new InputAction(
-                new Buttons[] { Buttons.B, Buttons.Back },
-                new Keys[] { Keys.Escape, Keys.Back },
                 true);
         }
 
@@ -112,14 +105,6 @@ namespace Juego2D
                 // Raise the accepted event, then exit the message box.
                 if (Accepted != null)
                     Accepted(this, new PlayerIndexEventArgs(playerIndex));
-
-                ExitScreen();
-            }
-            else if (menuCancel.Evaluate(input, ControllingPlayer, out playerIndex))
-            {
-                // Raise the cancelled event, then exit the message box.
-                if (Cancelled != null)
-                    Cancelled(this, new PlayerIndexEventArgs(playerIndex));
 
                 ExitScreen();
             }

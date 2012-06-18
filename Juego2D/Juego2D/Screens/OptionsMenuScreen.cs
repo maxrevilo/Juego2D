@@ -43,7 +43,7 @@ namespace Juego2D
         /// Constructor.
         /// </summary>
         public OptionsMenuScreen()
-            : base("Options")
+            : base("Opciones")
         {
             // Create our menu entries.
             ungulateMenuEntry = new MenuEntry(string.Empty);
@@ -53,7 +53,7 @@ namespace Juego2D
 
             SetMenuEntryText();
 
-            MenuEntry back = new MenuEntry("Back");
+            MenuEntry back = new MenuEntry("Atras");
 
             // Hook up menu event handlers.
             ungulateMenuEntry.Selected += UngulateMenuEntrySelected;

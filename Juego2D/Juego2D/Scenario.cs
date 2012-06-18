@@ -22,12 +22,14 @@ namespace Juego2D
     public class Scenario : PhysicObject
     {
         private int levelNumber;
+        private List<SpriteSheet> images;
 
         public Scenario(GameScreen gameScreen, GameWorld world, Camera2D camera)
             : base(gameScreen, world, camera)
         {
             levelNumber = 0;
             physics.bodys = new Body[1]{ new Body(world) };
+            images = new List<SpriteSheet>();
         }
 
         /// <summary>
@@ -61,6 +63,17 @@ namespace Juego2D
                 f.Friction = friction;
             }
         }
+
+        public void loadImage(Texture2D sheet, Vector2 position, float scale, float depth = 1f, int rows = 1, int columns = 1)
+        {
+            SpriteSheet newImage = new SpriteSheet(Game, sheet, rows, columns, gameScreen.ScreenManager.SpriteBatch);
+            newImage.depth = depth;
+            newImage.scale = scale;
+            newImage.position = position;
+            newImage.rotationCenter = new Vector2(0, 0);
+            images.Add(newImage);
+        }
+
         public override void loadContent(ContentManager contentManager)
         {
             
@@ -80,11 +93,21 @@ namespace Juego2D
         {
             float seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            foreach (SpriteSheet sh in images)
+            {
+                sh.Update(gameTime);
+            }
+
             base.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime)
         {
+            foreach (SpriteSheet sh in images)
+            {
+                sh.Draw(gameTime);
+            }
+
             base.Draw(gameTime);
         }
     }
