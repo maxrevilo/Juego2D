@@ -100,13 +100,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Levels\LevelT.1.png">
-      <Name>LevelT.1</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Levels\fondoTest.jpg">
       <Name>fondoTest</Name>
       <Importer>TextureImporter</Importer>
@@ -145,13 +138,6 @@
     </Compile>
     <Compile Include="Levels\Level0\T5.png">
       <Name>T5</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="walk.png">
-      <Name>walk</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
